@@ -1,6 +1,6 @@
 .scene {
   height: 100vh;
-  background: #ffffff;
+  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 50%, #a5d6a7 100%);
   overflow: hidden;
   position: relative;
   text-align: center;
@@ -14,12 +14,20 @@
 }
 
 .leaf {
-  position: absolute;
+  position: fixed;
   top: -40px;
-  pointer-events: none;
+  pointer-events: auto;
   animation-name: fall;
   animation-timing-function: linear;
   animation-fill-mode: forwards;
+  cursor: grab;
+  user-select: none;
+}
+
+.leaf.grabbing {
+  cursor: grabbing;
+  animation-play-state: paused;
+  z-index: 10;
 }
 
 @keyframes fall {
@@ -29,17 +37,4 @@
   }
 }
 
-.start-btn {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 14px 28px;
-  font-size: 18px;
-  background: #0f6b2f;
-  color: white;
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  z-index: 5;
-}
+

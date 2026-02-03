@@ -5,16 +5,25 @@ export default function TreeExperience() {
   const [leaves, setLeaves] = useState([]);
   const [grabbedLeaf, setGrabbedLeaf] = useState(null);
   const sceneRef = useRef(null);
+  const lastShakeTime = useRef(0);
+  const shakeCooldown = 300; // milliseconds
 
   useEffect(() => {
     const handleMotion = (e) => {
+      const now = Date.now();
+      if (now - lastShakeTime.current < shakeCooldown) return;
+      
       const acc = e.accelerationIncludingGravity;
       if (!acc) return;
 
-      const strength =
-        Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
-
-      if (strength > 28) {
+      // Optimized detection with throttling
+      const xAxis = Math.abs(acc.x) || 0;
+      const yAxis = Math.abs(acc.y) || 0;
+      
+      const strength = xAxis + yAxis;
+      
+      if (strength > 20) {
+        lastShakeTime.current = now;
         spawnLeaves();
         playSound();
       }
@@ -26,27 +35,43 @@ export default function TreeExperience() {
   }, []);
 
   const spawnLeaves = () => {
-    const batch = Array.from({ length: 15 }).map((_, i) => ({
+    // Reduced batch size for better performance
+    const batchSize = window.innerWidth < 768 ? 8 : 12;
+    const batch = Array.from({ length: batchSize }).map((_, i) => ({
       id: Date.now() + i,
       left: Math.random() * 100,
-      size: 20 + Math.random() * 25,
+      size: 15 + Math.random() * 20,
       rotate: Math.random() * 360,
-      duration: 1.5 + Math.random() * 1.5,
-      fallDelay: Math.random() * 0.5,
+      duration: 1 + Math.random() * 1,
+      fallDelay: Math.random() * 0.3,
     }));
 
-    setLeaves((prev) => [...prev, ...batch]);
+    setLeaves((prev) => {
+      // Limit total leaves for performance
+      const maxLeaves = window.innerWidth < 768 ? 40 : 60;
+      const newLeaves = [...prev, ...batch];
+      return newLeaves.length > maxLeaves 
+        ? newLeaves.slice(newLeaves.length - maxLeaves)
+        : newLeaves;
+    });
 
-    // Faster cleanup to reduce hanging
+    // Quick cleanup
     setTimeout(() => {
       setLeaves((prev) => prev.slice(batch.length));
-    }, 2500);
+    }, 2000);
   };
 
   const playSound = () => {
-    const audio = new Audio("/leaves.mp3");
-    audio.volume = 0.3;
-    audio.play().catch(() => {});
+    // Throttle sound playback
+    if (typeof window !== 'undefined' && !window.soundPlaying) {
+      window.soundPlaying = true;
+      const audio = new Audio("/leaves.mp3");
+      audio.volume = 0.2;
+      audio.play().catch(() => {});
+      setTimeout(() => {
+        window.soundPlaying = false;
+      }, 200);
+    }
   };
 
   const handleLeafGrab = (e, leafId) => {
@@ -61,15 +86,21 @@ export default function TreeExperience() {
   const handleLeafMove = (e) => {
     if (!grabbedLeaf) return;
     
-    const sceneRect = sceneRef.current.getBoundingClientRect();
-    const x = ((e.touches?.[0].clientX || e.clientX) - sceneRect.left) / sceneRect.width * 100;
-    const y = ((e.touches?.[0].clientY || e.clientY) - sceneRect.top) / sceneRect.height * 100;
-    
-    setLeaves(prev => prev.map(leaf => 
-      leaf.id === grabbedLeaf 
-        ? { ...leaf, left: Math.max(0, Math.min(100, x)), top: Math.max(0, Math.min(100, y)) }
-        : leaf
-    ));
+    // Throttled position updates
+    if (!window.moveTimeout) {
+      window.moveTimeout = setTimeout(() => {
+        const sceneRect = sceneRef.current.getBoundingClientRect();
+        const x = ((e.touches?.[0].clientX || e.clientX) - sceneRect.left) / sceneRect.width * 100;
+        const y = ((e.touches?.[0].clientY || e.clientY) - sceneRect.top) / sceneRect.height * 100;
+        
+        setLeaves(prev => prev.map(leaf => 
+          leaf.id === grabbedLeaf 
+            ? { ...leaf, left: Math.max(0, Math.min(100, x)), top: Math.max(0, Math.min(100, y)) }
+            : leaf
+        ));
+        window.moveTimeout = null;
+      }, 16); // ~60fps
+    }
   };
 
   return (

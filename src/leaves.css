@@ -1,9 +1,19 @@
 .scene {
   height: 100vh;
-  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 50%, #a5d6a7 100%);
+  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 50%, #81c784 100%);
+  background-attachment: fixed;
   overflow: hidden;
   position: relative;
   text-align: center;
+}
+
+/* Mobile-specific background */
+@media (max-width: 768px) {
+  .scene {
+    background: linear-gradient(to bottom, #e8f5e8 0%, #a5d6a7 100%);
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
 }
 
 .tree {

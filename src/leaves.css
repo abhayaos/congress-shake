@@ -1,0 +1,45 @@
+.scene {
+  height: 100vh;
+  background: #ffffff;
+  overflow: hidden;
+  position: relative;
+  text-align: center;
+}
+
+.tree {
+  width: 220px;
+  margin-top: 120px;
+  z-index: 2;
+  position: relative;
+}
+
+.leaf {
+  position: absolute;
+  top: -40px;
+  pointer-events: none;
+  animation-name: fall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.start-btn {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 14px 28px;
+  font-size: 18px;
+  background: #0f6b2f;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  z-index: 5;
+}

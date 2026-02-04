@@ -6,16 +6,22 @@
   overflow: hidden;
   position: relative;
   text-align: center;
+  /* Improve performance for dense leaf animations */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
 
 /* Tree styling */
 .tree {
   width: 220px;
   margin-top: 120px;
-  z-index: 2;
+  z-index: 20;
   position: relative;
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease;
   transform-origin: bottom center;
+  /* Ensure tree stays above falling leaves */
+  will-change: transform;
 }
 
 /* Leaves base style */
@@ -25,52 +31,67 @@
   cursor: grab;
   user-select: none;
   animation-name: fall;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-timing-function: cubic-bezier(0.3, 0.1, 0.2, 1);
   animation-fill-mode: forwards;
   will-change: transform, top, left;
   transform-origin: center;
   z-index: 1;
+  /* Ensure leaves can start from outside viewport */
+  min-width: 12px;
+  min-height: 12px;
 }
 
 /* Grabbed leaf style */
 .leaf.grabbing {
   cursor: grabbing;
-  animation-play-state: paused;
-  z-index: 10;
+  animation-play-state: paused !important;
+  z-index: 100;
+  /* Prevent interaction with other leaves while grabbing */
+  pointer-events: none;
 }
 
-/* Natural fall animation */
+.leaf.grabbing ~ .leaf {
+  pointer-events: none;
+}
+
+/* Natural fall animation from all directions */
 @keyframes fall {
   0% {
-    top: -15%;
     opacity: 1;
     transform: rotate(0deg) rotateZ(0deg);
   }
   100% {
-    top: 110vh;
-    opacity: 0.7;
-    transform: rotate(720deg) rotateZ(45deg);
+    opacity: 0.6;
+    transform: rotate(1080deg) rotateZ(60deg);
   }
 }
 
 /* Tree shaking animation */
 .tree.shaking {
-  animation: treeShake 0.1s ease infinite;
+  animation: treeShake 0.15s ease-in-out infinite;
 }
 
 @keyframes treeShake {
-  0% { transform: rotate(-1deg); }
-  50% { transform: rotate(1deg); }
-  100% { transform: rotate(-1deg); }
+  0% { transform: rotate(-2deg); }
+  25% { transform: rotate(1deg); }
+  50% { transform: rotate(2deg); }
+  75% { transform: rotate(-1deg); }
+  100% { transform: rotate(-2deg); }
 }
 
 /* Responsive leaf size */
 @media (max-width: 768px) {
   .leaf {
-    width: 12px;
+    min-width: 10px;
+    min-height: 10px;
   }
   .tree {
     width: 180px;
     margin-top: 100px;
+  }
+  
+  /* Optimize for mobile performance */
+  .leaf {
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
 }

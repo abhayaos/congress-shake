@@ -37,22 +37,50 @@ export default function TreeExperience() {
   }, []);
 
   const spawnLeaves = (countMultiplier = 1) => {
-    const batchSize = (window.innerWidth < 768 ? 8 : 12) * countMultiplier;
-    const batch = Array.from({ length: batchSize }).map((_, i) => ({
-      id: Date.now() + i,
-      left: 35 + Math.random() * 30, // Start from tree area
-      top: -10 - Math.random() * 20, // Start above viewport
-      size: 15 + Math.random() * 20,
-      rotate: Math.random() * 360,
-      tilt: -45 + Math.random() * 90,
-      duration: 2 + Math.random() * 1.5, // Proper fall duration
-      fallDelay: Math.random() * 0.3,
-      gravity: 0.5 + Math.random() * 0.3, // Gravity factor
-      sway: -2 + Math.random() * 4, // Horizontal sway
-    }));
+    const batchSize = (window.innerWidth < 768 ? 15 : 25) * countMultiplier;
+    const batch = Array.from({ length: batchSize }).map((_, i) => {
+      // Distribute leaves from all corners and edges
+      const corner = i % 4;
+      let left, top;
+      
+      switch(corner) {
+        case 0: // Top-left corner
+          left = -5 - Math.random() * 15;
+          top = -10 - Math.random() * 20;
+          break;
+        case 1: // Top-right corner
+          left = 105 + Math.random() * 15;
+          top = -10 - Math.random() * 20;
+          break;
+        case 2: // Left edge (middle)
+          left = -10 - Math.random() * 20;
+          top = 20 + Math.random() * 60;
+          break;
+        case 3: // Right edge (middle)
+          left = 110 + Math.random() * 20;
+          top = 20 + Math.random() * 60;
+          break;
+        default:
+          left = 35 + Math.random() * 30;
+          top = -10 - Math.random() * 20;
+      }
+      
+      return {
+        id: Date.now() + i,
+        left,
+        top,
+        size: 12 + Math.random() * 18,
+        rotate: Math.random() * 360,
+        tilt: -60 + Math.random() * 120,
+        duration: 2.5 + Math.random() * 2, // Longer fall duration
+        fallDelay: Math.random() * 0.5,
+        gravity: 0.4 + Math.random() * 0.4,
+        sway: -3 + Math.random() * 6,
+      };
+    });
 
     setLeaves((prev) => {
-      const maxLeaves = window.innerWidth < 768 ? 50 : 80;
+      const maxLeaves = window.innerWidth < 768 ? 80 : 120;
       const newLeaves = [...prev, ...batch];
       return newLeaves.length > maxLeaves
         ? newLeaves.slice(newLeaves.length - maxLeaves)

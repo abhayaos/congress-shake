@@ -1,5 +1,7 @@
+/* Scene setup */
 .scene {
   height: 100vh;
+  width: 100%;
   background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 50%, #81c784 100%);
   background-attachment: fixed;
   overflow: hidden;
@@ -16,6 +18,7 @@
   }
 }
 
+/* Tree styling */
 .tree {
   width: 220px;
   margin-top: 120px;
@@ -23,6 +26,7 @@
   position: relative;
 }
 
+/* Leaves base style */
 .leaf {
   position: fixed;
   top: -40px;
@@ -32,19 +36,57 @@
   animation-fill-mode: forwards;
   cursor: grab;
   user-select: none;
+  will-change: transform, top, left; /* optimization */
+  transition: transform 0.1s ease; /* smooth tilt when grabbed */
 }
 
+/* Leaf grabbing */
 .leaf.grabbing {
   cursor: grabbing;
   animation-play-state: paused;
   z-index: 10;
 }
 
+/* Falling animation */
 @keyframes fall {
-  to {
-    transform: translateY(110vh) rotate(720deg);
+  0% {
+    transform: rotate(0deg) rotateZ(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: rotate(180deg) rotateZ(-20deg);
+  }
+  75% {
+    transform: rotate(540deg) rotateZ(20deg);
+  }
+  100% {
+    transform: translateY(120vh) rotate(1080deg) rotateZ(45deg);
     opacity: 0;
   }
 }
 
+/* Optional: make leaves sway horizontally while falling */
+.leaf::after {
+  content: "";
+  display: block;
+  animation: sway 2s ease-in-out infinite alternate;
+}
 
+@keyframes sway {
+  0% {
+    transform: translateX(0px);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+  100% {
+    transform: translateX(-10px);
+  }
+}
+
+/* Responsive leaves size adjustment */
+@media (max-width: 768px) {
+  .leaf {
+    width: 12px;
+  }
+}

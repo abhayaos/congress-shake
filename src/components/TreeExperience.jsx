@@ -160,8 +160,9 @@ export default function TreeExperience() {
           className={`leaf ${grabbedLeaf === leaf.id ? "grabbing" : ""}`}
           style={{
             left: `${leaf.left + (leaf.sway || 0)}%`,
-            top: leaf.top ? `${leaf.top}%` : "-15%",
-            width: leaf.size,
+            top: `${leaf.top}%`,
+            width: `${leaf.size}px`,
+            height: `${leaf.size * 1.2}px`,
             animationDuration: `${leaf.duration}s`,
             animationDelay: `${leaf.fallDelay}s`,
             transform: `rotate(${leaf.rotate}deg) rotateZ(${leaf.tilt}deg)`

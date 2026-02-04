@@ -37,8 +37,8 @@
   transform-origin: center;
   z-index: 1;
   /* Ensure leaves can start from outside viewport */
-  min-width: 12px;
-  min-height: 12px;
+  width: 20px;
+  height: 24px;
 }
 
 /* Grabbed leaf style */
@@ -58,11 +58,11 @@
 @keyframes fall {
   0% {
     opacity: 1;
-    transform: rotate(0deg) rotateZ(0deg);
+    transform: translateY(0) rotate(0deg) rotateZ(0deg);
   }
   100% {
     opacity: 0.6;
-    transform: rotate(1080deg) rotateZ(60deg);
+    transform: translateY(120vh) rotate(1080deg) rotateZ(60deg);
   }
 }
 
@@ -82,8 +82,8 @@
 /* Responsive leaf size */
 @media (max-width: 768px) {
   .leaf {
-    min-width: 10px;
-    min-height: 10px;
+    width: 16px;
+    height: 19px;
   }
   .tree {
     width: 180px;

@@ -14,20 +14,22 @@
   margin-top: 120px;
   z-index: 2;
   position: relative;
+  transition: transform 0.3s ease;
+  transform-origin: bottom center;
 }
 
 /* Leaves base style */
 .leaf {
   position: absolute;
-  top: -50px;
   pointer-events: auto;
   cursor: grab;
   user-select: none;
   animation-name: fall;
-  animation-timing-function: linear;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   animation-fill-mode: forwards;
   will-change: transform, top, left;
   transform-origin: center;
+  z-index: 1;
 }
 
 /* Grabbed leaf style */
@@ -37,34 +39,38 @@
   z-index: 10;
 }
 
-/* Fast fall animation */
+/* Natural fall animation */
 @keyframes fall {
   0% {
-    transform: rotate(0deg) rotateZ(0deg);
+    top: -15%;
     opacity: 1;
+    transform: rotate(0deg) rotateZ(0deg);
   }
   100% {
-    transform: translateY(120vh) rotate(1080deg) rotateZ(45deg);
-    opacity: 0;
+    top: 110vh;
+    opacity: 0.7;
+    transform: rotate(720deg) rotateZ(45deg);
   }
 }
 
-/* Leaf sway while falling */
-.leaf::after {
-  content: "";
-  display: block;
-  animation: sway 2s ease-in-out infinite alternate;
+/* Tree shaking animation */
+.tree.shaking {
+  animation: treeShake 0.1s ease infinite;
 }
 
-@keyframes sway {
-  0% { transform: translateX(0px); }
-  50% { transform: translateX(15px); }
-  100% { transform: translateX(-15px); }
+@keyframes treeShake {
+  0% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+  100% { transform: rotate(-1deg); }
 }
 
 /* Responsive leaf size */
 @media (max-width: 768px) {
   .leaf {
     width: 12px;
+  }
+  .tree {
+    width: 180px;
+    margin-top: 100px;
   }
 }

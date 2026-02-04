@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import "../leaves.css";
 
+
 export default function TreeExperience() {
   const [leaves, setLeaves] = useState([]);
   const [grabbedLeaf, setGrabbedLeaf] = useState(null);
   const sceneRef = useRef(null);
   const lastShakeTime = useRef(0);
-  const shakeCooldown = 300;
+  const shakeCooldown = 150; // faster response
 
   useEffect(() => {
     const handleMotion = (e) => {
@@ -16,10 +17,13 @@ export default function TreeExperience() {
       const acc = e.accelerationIncludingGravity;
       if (!acc) return;
 
-      const strength = Math.abs(acc.x || 0) + Math.abs(acc.y || 0);
-      if (strength > 20) {
+      const strength = Math.abs(acc.x || 0) + Math.abs(acc.y || 0) + Math.abs(acc.z || 0);
+
+      if (strength > 15) {
         lastShakeTime.current = now;
-        spawnLeaves();
+        // Spawn more leaves if stronger shake
+        const multiplier = Math.min(Math.floor(strength / 5), 5);
+        spawnLeaves(multiplier);
         playSound();
       }
     };
@@ -28,20 +32,20 @@ export default function TreeExperience() {
     return () => window.removeEventListener("devicemotion", handleMotion);
   }, []);
 
-  const spawnLeaves = () => {
-    const batchSize = window.innerWidth < 768 ? 8 : 12;
+  const spawnLeaves = (countMultiplier = 1) => {
+    const batchSize = (window.innerWidth < 768 ? 8 : 12) * countMultiplier;
     const batch = Array.from({ length: batchSize }).map((_, i) => ({
       id: Date.now() + i,
       left: Math.random() * 100,
       size: 15 + Math.random() * 20,
       rotate: Math.random() * 360,
-      tilt: -45 + Math.random() * 90, // tilt ±45deg
-      duration: 1 + Math.random() * 1, // faster fall
-      fallDelay: Math.random() * 0.3,
+      tilt: -45 + Math.random() * 90,
+      duration: 0.8 + Math.random() * 0.7, // faster fall
+      fallDelay: Math.random() * 0.2,
     }));
 
     setLeaves((prev) => {
-      const maxLeaves = window.innerWidth < 768 ? 40 : 60;
+      const maxLeaves = window.innerWidth < 768 ? 50 : 80;
       const newLeaves = [...prev, ...batch];
       return newLeaves.length > maxLeaves
         ? newLeaves.slice(newLeaves.length - maxLeaves)
@@ -50,7 +54,7 @@ export default function TreeExperience() {
 
     setTimeout(() => {
       setLeaves((prev) => prev.slice(batch.length));
-    }, 2000);
+    }, 2500);
   };
 
   const playSound = () => {
@@ -59,9 +63,7 @@ export default function TreeExperience() {
       const audio = new Audio("/leaves.mp3");
       audio.volume = 0.2;
       audio.play().catch(() => {});
-      setTimeout(() => {
-        window.soundPlaying = false;
-      }, 200);
+      setTimeout(() => (window.soundPlaying = false), 200);
     }
   };
 
@@ -70,9 +72,7 @@ export default function TreeExperience() {
     setGrabbedLeaf(leafId);
   };
 
-  const handleLeafRelease = () => {
-    setGrabbedLeaf(null);
-  };
+  const handleLeafRelease = () => setGrabbedLeaf(null);
 
   const handleLeafMove = (e) => {
     if (!grabbedLeaf) return;
@@ -115,7 +115,6 @@ export default function TreeExperience() {
       onTouchEnd={handleLeafRelease}
     >
       <img src="/tree.svg" className="tree" />
-
       {leaves.map((leaf) => (
         <img
           key={leaf.id}
@@ -128,8 +127,6 @@ export default function TreeExperience() {
             animationDuration: `${leaf.duration}s`,
             animationDelay: `${leaf.fallDelay}s`,
             transform: `rotate(${leaf.rotate}deg) rotateZ(${leaf.tilt}deg)`,
-            pointerEvents: "auto",
-            position: leaf.top ? "absolute" : "fixed",
           }}
           onMouseDown={(e) => handleLeafGrab(e, leaf.id)}
           onTouchStart={(e) => handleLeafGrab(e, leaf.id)}
